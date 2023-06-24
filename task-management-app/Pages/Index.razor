@@ -1,62 +1,72 @@
-﻿
-
-@page "/"
+﻿@page "/"
 @using Microsoft.JSInterop
 
 <PageTitle>Task Management App</PageTitle>
 <head>
     <link href="css/sliderPanel.css" rel="stylesheet" />
+    <link href="css/index.css" rel="stylesheet"/>
 </head>
 @*//create a new task button*@
 <div class="row">
     <div class="col-md-12">
         @*//create a string input field for the task name and bind it to the TaskName property of the TaskModel class *@
-        <input type="text" class="form-control" @bind="currentTaskName" />
+        <input type="text" class="form-control half-width" placeholder="Add a new task" @oninput="UpdateCurrentTaskName" @bind="currentTaskName" @onkeydown="HandleKeyDown" />
         @if (validationFlag)
         {
             <p class="text-danger">Please enter a valid task name.</p>
         }
-        <button class="btn btn-primary" @onclick="CreateNewTask">Create New Task</button>
     </div>
 </div>
 
-@*//display the list of tasks*@
-<div class="row">
-    <div class="col-md-12">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Task Name</th>
-                    <th>Task Description</th>
-                    <th>Task Status</th>
-                    <th>Task Priority</th>
-                    <th>Task Due Date</th>
-                    <th>Task Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var task in tasks)
-                {
-                    <tr class="clickable-row @(task.TaskStatus=="Completed" ? " completed-task" : "")" @onclick="() =>ToggleSliderPanel(task)">
-                        @* //render radio button for each task in the task list table and bind the radio button to the TaskId property of the TaskModel class *@
-                        <td>
-                            <input type="radio" name="@(task.TaskId.ToString())" @bind="task.TaskId" @onclick="() => CompleteTask(task)" @onclick:stopPropagation />
-                        </td>
-                        <td>@task.TaskName</td>
-                        <td>@task.TaskDescription</td>
-                        <td>@task.TaskStatus</td>
-                        <td>@task.TaskPriority</td>
-                        <td>@task.TaskDueDate</td>
-                        <td>
-                            <button class="oi oi-trash" @onclick="() => DeleteTask(task.TaskId)" @onclick:stopPropagation></button>
-                        </td>
+@if(tasks.Count > 0)
+{
+    @*//display the list of tasks*@
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Task Name</th>
+                        <th>Task Description</th>
+                        <th>Task Status</th>
+                        <th>Task Priority</th>
+                        <th>Task Due Date</th>
+                        <th>Task Actions</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var task in tasks)
+                    {
+                        <tr class="clickable-row @(task.TaskStatus=="Completed" ? " completed-task" : "")" @onclick="() =>ToggleSliderPanel(task)">
+                            @* //render radio button for each task in the task list table and bind the radio button to the TaskId property of the TaskModel class *@
+                            <td>
+                                <input type="radio" name="@(task.TaskId.ToString())" @bind="task.TaskId" @onclick="() => CompleteTask(task)" @onclick:stopPropagation />
+                            </td>
+                            <td>@task.TaskName</td>
+                            <td>@task.TaskDescription</td>
+                            <td>@task.TaskStatus</td>
+                            <td>@task.TaskPriority</td>
+                            <td>@task.TaskDueDate</td>
+                            <td style="text-align: center;">
+                                <button class="oi oi-trash delete-button" @onclick="() => DeleteTask(task.TaskId)" @onclick:stopPropagation></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
+}
+else
+{
+   <div class="row">
+        <div class="col-md-12">
+            <p class="text-center no-tasks">Hurray,You have completed all your tasks!!</p>
+        </div>
+    </div>
+
+}
 
 @*Display list of completed tasks in the task list table below the list of tasks *@
 @if (completedTasks.Count > 0)
@@ -88,8 +98,8 @@
                             <td>@task.TaskStatus</td>
                             <td>@task.TaskPriority</td>
                             <td>@task.TaskDueDate</td>
-                            <td>
-                                <button class="oi oi-trash" @onclick="() => DeleteTask(task.TaskId)" @onclick:stopPropagation></button>
+                            <td style="text-align:center;">
+                                <button class="oi oi-trash delete-button" @onclick="() => DeleteTask(task.TaskId)" @onclick:stopPropagation></button>
                             </td>
                         </tr>
                     }
@@ -292,6 +302,22 @@
             task.TaskStatus = "Completed";
             tasks.Remove(task);
             completedTasks.Add(task);
+        }
+    }
+
+    private void UpdateCurrentTaskName(ChangeEventArgs e)
+    {
+        currentTaskName = e.Value.ToString();
+    }
+
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            Console.WriteLine("when enter pressed : " + currentTaskName);
+            CreateNewTask();
+            currentTaskName = string.Empty;
         }
     }
 
