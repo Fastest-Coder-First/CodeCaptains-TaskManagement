@@ -9,6 +9,10 @@
     <div class="col-md-12">
         @*//create a string input field for the task name and bind it to the TaskName property of the TaskModel class *@
         <input type="text" class="form-control" @bind="currentTaskName" />
+        @if (validationFlag)
+        {
+            <p class="text-danger">Please enter a valid task name.</p>
+        }
         <button class="btn btn-primary" @onclick="CreateNewTask">Create New Task</button>
     </div>
 </div>
@@ -19,7 +23,6 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Id</th>
                     <th>Task Name</th>
                     <th>Task Description</th>
                     <th>Task Status</th>
@@ -31,15 +34,18 @@
             <tbody>
                 @foreach (var task in tasks)
                 {
-                    <tr class="clickable-row" @onclick="() =>ToggleSliderPanel(task)">
-                        <td>@task.TaskId</td>
+                    <tr class="clickable-row @(task.TaskStatus=="Completed" ? " completed-task" : "")" @onclick="() =>ToggleSliderPanel(task)">
+                        @* //render radio button for each task in the task list table and bind the radio button to the TaskId property of the TaskModel class *@
+                        <td>
+                            <input type="radio" name="@(task.TaskId.ToString())" @bind="task.TaskId" @onclick="() => CompleteTask(task)" @onclick:stopPropagation />
+                        </td>
                         <td>@task.TaskName</td>
                         <td>@task.TaskDescription</td>
                         <td>@task.TaskStatus</td>
                         <td>@task.TaskPriority</td>
                         <td>@task.TaskDueDate</td>
                         <td>
-                            <button class="btn btn-danger" @onclick="() => DeleteTask(task.TaskId)">Delete</button>
+                            <button class="btn btn-danger" @onclick="() => DeleteTask(task.TaskId)" @onclick:stopPropagation>Delete</button>
                         </td>
                     </tr>
                 }
@@ -48,10 +54,49 @@
     </div>
 </div>
 
-//render an slider panel to view and edit the task details on click of the edit button in the task list table 
-//the below slider panel should move in from the right side of the screen and cover 25% of the screen with fade-in effect 
-//the slider panel should move out to the right side of the screen with fade-out effect on click of the cancel button
-//the slider panel should move out to the right side of the screen with fade-out effect on click of the save button
+@*Display list of completed tasks in the task list table below the list of tasks *@
+@if (completedTasks.Count > 0)
+{
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Completed Tasks</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Task Name</th>
+                        <th>Task Description</th>
+                        <th>Task Status</th>
+                        <th>Task Priority</th>
+                        <th>Task Due Date</th>
+                        <th>Task Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in completedTasks)
+                    {
+                        <tr class="clickable-row @(task.TaskStatus=="Completed" ? " completed-task" : "")" @onclick="() =>ToggleSliderPanel(task)">
+                            <td>
+                                <input type="radio" name="@(task.TaskId.ToString())" @bind="task.TaskId" @onclick="() => CompleteTask(task)" @onclick:stopPropagation />
+                            </td>
+                            <td>@task.TaskName</td>
+                            <td>@task.TaskDescription</td>
+                            <td>@task.TaskStatus</td>
+                            <td>@task.TaskPriority</td>
+                            <td>@task.TaskDueDate</td>
+                            <td>
+                                <button class="btn btn-danger" @onclick="() => DeleteTask(task.TaskId)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@*//render an slider panel to view and edit the task details in the task list
+//the below slider panel should move in from the right side of the screen and cover 25% of the screen with fade-in effect *@
 @if (IsSliderPanelVisible)
 {
     <div class="slider-panel-container @(IsSliderPanelVisible ? "visible " : "" ) row">
@@ -108,12 +153,13 @@
 
 @*//write code to do CRUD operations on the tasks in memory *@
 @code {
-    
     List<TaskModel> tasks = new List<TaskModel>();
-    private int? currentTaskId = 0; 
+    List<TaskModel> completedTasks = new List<TaskModel>();
+    private int? currentTaskId = 0;
     private string? currentTaskName;
     private bool IsSliderPanelVisible { get; set; }
     private TaskModel selectedTask = new TaskModel();
+    private bool validationFlag = false;
     private async Task DeleteTask(int taskId)
     {
         var task = tasks.FirstOrDefault(t => t.TaskId == taskId);
@@ -137,17 +183,23 @@
 
     private void CreateNewTask()
     {
-    @*//add task to the list of tasks*@
-    tasks.Add(new TaskModel
-        {
-            TaskId = tasks.Count + 1,
-            TaskName = currentTaskName,
-            TaskDescription = "New Task Description",
-            TaskStatus = "Not Started",
-            TaskPriority = "Low",
-            TaskDueDate = DateTime.Now.AddDays(1)
-        });
+
+
+        var buildTask = new TaskModel
+            {
+                TaskId = tasks.Count + 1,
+                TaskName = currentTaskName,
+                TaskDescription = "-",
+                TaskStatus = "Not Started",
+                TaskPriority = "Low",
+                TaskDueDate = DateTime.Now.AddDays(1)
+            };
+            @*//add task to the list of tasks*@
+    if (!ValidateTaskInput(buildTask))
+    {   
+        tasks.Add(buildTask);
     }
+}
 
     @*//Define the TaskModel class*@
     public class TaskModel
@@ -187,20 +239,27 @@
             TaskDueDate = DateTime.Now.AddDays(2)
         };
 
-       tasks.Add(task2);
+        tasks.Add(task2);
 
         TaskModel task3 = new TaskModel
         {
             TaskId = 3,
             TaskName = "Task 3",
             TaskDescription = "Task 3 Description",
-            TaskStatus = "Completed",
+            TaskStatus = "Not Started",
             TaskPriority = "High",
             TaskDueDate = DateTime.Now.AddDays(3)
         };
 
         tasks.Add(task3);
     }
+    @*//write input validations on all properties of TaskModel in single function*@
+    private bool ValidateTaskInput(TaskModel task)
+    {
+        //trigger validation if task name is null or empty string
+        return validationFlag = string.IsNullOrEmpty(task.TaskName);
+    }
+
 
     private void SaveTask()
     {
@@ -213,6 +272,19 @@
         IsSliderPanelVisible = false;
     }
 
+    private void CompleteTask(TaskModel task)
+    {
+        if(task.TaskStatus =="Completed") {
+            task.TaskStatus = "Not Started";
+            completedTasks.Remove(task);
+            tasks.Add(task);
+        }
+        else {
+            task.TaskStatus = "Completed";
+            tasks.Remove(task);
+            completedTasks.Add(task);
+        }
+    }
 
 }
 

@@ -50,3 +50,7 @@
         right: 0;
     }
 
+    .completed-task{
+    text-decoration: line-through;
+    }
+
