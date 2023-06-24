@@ -10,6 +10,10 @@
     transition: opacity 0.3s;
 }
 
+.slider-panel-row {
+    margin-bottom: 30px; /* Adjust the value to control the vertical spacing */
+}
+
 .slider-panel-container.visible {
     opacity: 1;
 }
@@ -42,6 +46,12 @@
     cursor: pointer;
 }
 
+.close-icon {
+    cursor: pointer;
+    color: #ff0000; /* Change the color to your desired color */
+    font-size: 18px; /* Change the font size to your desired size */
+    margin-left: auto; /* Adjust the margin-left to position the icon */
+}
     .close-button:hover {
         color: red;
     }
