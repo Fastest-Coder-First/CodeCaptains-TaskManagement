@@ -7,6 +7,7 @@
     <RootNamespace>task_management_app</RootNamespace>
     <UserSecretsId>582e20cd-bba0-4f83-ba0d-7785b5adf8a8</UserSecretsId>
     <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+	  <UseRazorSourceGenerator>false</UseRazorSourceGenerator>
   </PropertyGroup>
 
   <ItemGroup>

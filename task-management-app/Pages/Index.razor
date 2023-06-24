@@ -1,5 +1,5 @@
 ﻿@page "/"
-
+@using Microsoft.JSInterop
 <PageTitle>Task Management App</PageTitle>
 <head>
     <link href="css/sliderPanel.css" rel="stylesheet" />
@@ -38,10 +38,9 @@
                         <td>@task.TaskStatus</td>
                         <td>@task.TaskPriority</td>
                         <td>@task.TaskDueDate</td>
-                        @*<td>
-                            <button class="btn btn-primary" @onclick="() => EditTask(task.TaskId)">Edit</button>
+                        <td>
                             <button class="btn btn-danger" @onclick="() => DeleteTask(task.TaskId)">Delete</button>
-                        </td>*@
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -60,12 +59,37 @@
             <div class="card">
                 <div class="card-header">
                     Task Details
+                    <button class="close-button" @onclick="CloseSliderPanel">X</button>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
-                            @*//create a string input field for the task name and bind it to the TaskName property of the TaskModel class *@
+                            <label>Task Name:</label>
                             <input type="text" class="form-control" @bind="selectedTask.TaskName" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Task Description:</label>
+                            <input type="text" class="form-control" @bind="selectedTask.TaskDescription" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Task Status:</label>
+                            <input type="text" class="form-control" @bind="selectedTask.TaskStatus" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Task Priority:</label>
+                            <input type="text" class="form-control" @bind="selectedTask.TaskPriority" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Task Due Date:</label>
+                            <input type="date" class="form-control" @bind="selectedTask.TaskDueDate" />
                         </div>
                     </div>
                     <div class="row">
@@ -80,6 +104,7 @@
     </div>
 }
 
+@inject IJSRuntime JSRuntime
 
 @*//write code to do CRUD operations on the tasks in memory *@
 @code {
@@ -89,6 +114,19 @@
     private string? currentTaskName;
     private bool IsSliderPanelVisible { get; set; }
     private TaskModel selectedTask = new TaskModel();
+    private async Task DeleteTask(int taskId)
+    {
+        var task = tasks.FirstOrDefault(t => t.TaskId == taskId);
+        if (task != null)
+        {
+            // Show a confirmation dialog
+            bool confirmation = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Do you want to delete task" + task.TaskId });
+            if (confirmation)
+            {
+                tasks.Remove(task);
+            }
+        }
+    }
 
     private void ToggleSliderPanel(TaskModel task)
     {
@@ -168,6 +206,10 @@
     {
         var task = tasks.FirstOrDefault(t => t.TaskId == selectedTask.TaskId);
         task.TaskName = selectedTask.TaskName;
+        IsSliderPanelVisible = true;
+    }
+    private void CloseSliderPanel()
+    {
         IsSliderPanelVisible = false;
     }
 
