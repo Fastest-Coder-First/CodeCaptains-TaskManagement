@@ -67,6 +67,8 @@
 .delete-button {
     border: none;
     padding: 0;
-    text-align: center
+    text-align: center;
+    margin-right:100px;
 }
+
 

@@ -4,6 +4,10 @@
     flex-direction: column;
 }
 
+.home-color {
+    background-color: #b6ff00ff;
+}
+
 main {
     flex: 1;
 }
