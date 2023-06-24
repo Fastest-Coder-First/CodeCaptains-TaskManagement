@@ -2,19 +2,22 @@
 
 <PageTitle>Task Management App</PageTitle>
 
-//create a new task button
+@*//create a new task button*@
 <div class="row">
     <div class="col-md-12">
+        @*//create a string input field for the task name and bind it to the TaskName property of the TaskModel class *@
+        <input type="text" class="form-control" @bind="currentTaskName" />
         <button class="btn btn-primary" @onclick="CreateNewTask">Create New Task</button>
     </div>
 </div>
 
-//display the list of tasks
+@*//display the list of tasks*@
 <div class="row">
     <div class="col-md-12">
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th>Id</th>
                     <th>Task Name</th>
                     <th>Task Description</th>
                     <th>Task Status</th>
@@ -27,6 +30,7 @@
                 @foreach (var task in tasks)
                 {
                     <tr>
+                        <td>@task.TaskId</td>
                         <td>@task.TaskName</td>
                         <td>@task.TaskDescription</td>
                         <td>@task.TaskStatus</td>
@@ -43,18 +47,19 @@
     </div>
 </div>
 
-//write code to do CRUD operations on the tasks in memory 
+@*//write code to do CRUD operations on the tasks in memory *@
 @code {
-    //create a list of tasks
+    
     List<TaskModel> tasks = new List<TaskModel>();
-
+    private int? currentTaskId = 0; 
+    private string? currentTaskName;
     private void CreateNewTask()
     {
-        //add task to the list of tasks
+    @*//add task to the list of tasks*@
     tasks.Add(new TaskModel
         {
             TaskId = tasks.Count + 1,
-            TaskName = "New Task",
+            TaskName = currentTaskName,
             TaskDescription = "New Task Description",
             TaskStatus = "Not Started",
             TaskPriority = "Low",
@@ -62,21 +67,21 @@
         });
     }
 
-    //Define the TaskModel class
+    @*//Define the TaskModel class*@
     public class TaskModel
     {
-        public int TaskId { get; set; }
-        public string TaskName { get; set; }
-        public string TaskDescription { get; set; }
-        public string TaskStatus { get; set; }
-        public string TaskPriority { get; set; }
-        public DateTime TaskDueDate { get; set; }
+    public int TaskId { get; set; }
+    public string TaskName { get; set; }
+    public string TaskDescription { get; set; }
+    public string TaskStatus { get; set; }
+    public string TaskPriority { get; set; }
+    public DateTime TaskDueDate { get; set; }
     }
 
-    //create a method to load the tasks
+    @*//create a method to load the tasks*@
     protected override void OnInitialized()
     {
-        //create a new task
+        @*//create a new task*@
         TaskModel task1 = new TaskModel
         {
             TaskId = 1,
@@ -87,10 +92,9 @@
             TaskDueDate = DateTime.Now.AddDays(1)
         };
 
-        //add the task to the list of tasks
+
         tasks.Add(task1);
 
-        //create a new task
         TaskModel task2 = new TaskModel
         {
             TaskId = 2,
@@ -101,10 +105,8 @@
             TaskDueDate = DateTime.Now.AddDays(2)
         };
 
-        //add the task to the list of tasks
-        tasks.Add(task2);
+       tasks.Add(task2);
 
-        //create a new task
         TaskModel task3 = new TaskModel
         {
             TaskId = 3,
@@ -115,7 +117,6 @@
             TaskDueDate = DateTime.Now.AddDays(3)
         };
 
-        //add the task to the list of tasks
         tasks.Add(task3);
     }
 
