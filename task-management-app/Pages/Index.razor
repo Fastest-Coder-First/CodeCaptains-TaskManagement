@@ -1,7 +1,9 @@
 ﻿@page "/"
 
 <PageTitle>Task Management App</PageTitle>
-
+<head>
+    <link href="css/sliderPanel.css" rel="stylesheet" />
+</head>
 @*//create a new task button*@
 <div class="row">
     <div class="col-md-12">
@@ -29,7 +31,7 @@
             <tbody>
                 @foreach (var task in tasks)
                 {
-                    <tr>
+                    <tr class="clickable-row" @onclick="() =>ToggleSliderPanel(task)">
                         <td>@task.TaskId</td>
                         <td>@task.TaskName</td>
                         <td>@task.TaskDescription</td>
@@ -47,12 +49,54 @@
     </div>
 </div>
 
+//render an slider panel to view and edit the task details on click of the edit button in the task list table 
+//the below slider panel should move in from the right side of the screen and cover 25% of the screen with fade-in effect 
+//the slider panel should move out to the right side of the screen with fade-out effect on click of the cancel button
+//the slider panel should move out to the right side of the screen with fade-out effect on click of the save button
+@if (IsSliderPanelVisible)
+{
+    <div class="slider-panel-container @(IsSliderPanelVisible ? "visible " : "" ) row">
+        <div class="slider-panel @(IsSliderPanelVisible ? "slide-in" : "slide-out") col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    Task Details
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            @*//create a string input field for the task name and bind it to the TaskName property of the TaskModel class *@
+                            <input type="text" class="form-control" @bind="selectedTask.TaskName" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button class="btn btn-primary" @onclick="SaveTask">Save</button>
+                            @*<button class="btn btn-danger" @onclick="CancelTask">Cancel</button>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 @*//write code to do CRUD operations on the tasks in memory *@
 @code {
     
     List<TaskModel> tasks = new List<TaskModel>();
     private int? currentTaskId = 0; 
     private string? currentTaskName;
+    private bool IsSliderPanelVisible { get; set; }
+    private TaskModel selectedTask = new TaskModel();
+
+    private void ToggleSliderPanel(TaskModel task)
+    {
+        IsSliderPanelVisible = !IsSliderPanelVisible;
+        Console.WriteLine("Slider Panel Visibility: " + IsSliderPanelVisible);
+        selectedTask = task;
+    }
+
     private void CreateNewTask()
     {
     @*//add task to the list of tasks*@
@@ -119,6 +163,14 @@
 
         tasks.Add(task3);
     }
+
+    private void SaveTask()
+    {
+        var task = tasks.FirstOrDefault(t => t.TaskId == selectedTask.TaskId);
+        task.TaskName = selectedTask.TaskName;
+        IsSliderPanelVisible = false;
+    }
+
 
 }
 
