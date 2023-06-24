@@ -58,4 +58,4 @@ Provide detailed descriptions for tasks to ensure clarity and provide necessary 
 
 
 # challenges we have faced 
-During the development of our Task Management App, we encountered certain challenges when integrating ChatGPT into our Visual Studio project with Razor Pages.
+During the development of our Task Management App, we encountered certain challenges when integrating Copilot into our Visual Studio project with Razor Pages.
